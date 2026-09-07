@@ -1,0 +1,181 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */{
+  "sections": {
+    "hero_jVaWmY": {
+      "type": "hero",
+      "blocks": {
+        "text_YLPk4p": {
+          "type": "text",
+          "name": "t:names.heading",
+          "settings": {
+            "text": "<p>Made for Beautiful Nights</p>",
+            "text_color": "{{ settings.color_palette.background }}",
+            "width": "fit-content",
+            "max_width": "narrow",
+            "alignment": "center",
+            "type_preset": "h1",
+            "font": "var(--font-heading--family)",
+            "line_height": "display-tight",
+            "letter_spacing": "normal",
+            "case": "none",
+            "wrap": "pretty",
+            "background": false,
+            "background_color": "#00000026",
+            "corner_radius": 0,
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {}
+        },
+        "text_subhead01": {
+          "type": "text",
+          "name": "t:names.text",
+          "settings": {
+            "text": "<p>Crafted from real, breathable fabrics — never polyester — for sleepwear that feels as good as it looks.</p>",
+            "text_color": "{{ settings.color_palette.background }}",
+            "width": "fit-content",
+            "max_width": "narrow",
+            "alignment": "center",
+            "type_preset": "rte",
+            "font": "var(--font-body--family)",
+            "line_height": "body-loose",
+            "letter_spacing": "normal",
+            "case": "none",
+            "wrap": "pretty",
+            "background": false,
+            "background_color": "#00000026",
+            "corner_radius": 0,
+            "padding-block-start": 8,
+            "padding-block-end": 24,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {}
+        },
+        "button_H9gpTf": {
+          "type": "button",
+          "name": "t:names.button",
+          "settings": {
+            "label": "Shop New Arrivals",
+            "link": "shopify://collections/all",
+            "open_in_new_tab": false,
+            "style_class": "button-custom",
+            "custom_button_background": "#CFA0A0",
+            "custom_button_text": "#2B2420",
+            "custom_button_border": "#CFA0A0",
+            "width": "fit-content",
+            "custom_width": 100,
+            "width_mobile": "fit-content",
+            "custom_width_mobile": 100
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "text_YLPk4p",
+        "text_subhead01",
+        "button_H9gpTf"
+      ],
+      "name": "t:names.hero",
+      "settings": {
+        "media_type_1": "video",
+        "video_1": "shopify://files/videos/neroli-hero-opening-scene.mp4",
+        "media_type_2": "image",
+        "stack_media_on_mobile": false,
+        "custom_mobile_media": false,
+        "media_type_1_mobile": "image",
+        "media_type_2_mobile": "image",
+        "open_in_new_tab": false,
+        "content_direction": "column",
+        "vertical_on_mobile": true,
+        "horizontal_alignment": "space-between",
+        "vertical_alignment": "flex-end",
+        "align_baseline": true,
+        "horizontal_alignment_flex_direction_column": "center",
+        "vertical_alignment_flex_direction_column": "flex-end",
+        "gap": 12,
+        "section_width": "full-width",
+        "section_height": "full-screen",
+        "section_height_custom": 50,
+        "background_color": "rgba(0,0,0,0)",
+        "toggle_overlay": true,
+        "overlay_color": "#2B242040",
+        "overlay_style": "gradient",
+        "gradient_direction": "to bottom",
+        "blurred_reflection": false,
+        "reflection_opacity": 75,
+        "padding-block-start": 0,
+        "padding-block-end": 72
+      }
+    },
+    "fabric_story_section": {
+      "type": "fabric-story",
+      "settings": {
+        "image": "shopify://shop_images/neroli-fabric-story-2.jpg",
+        "background_color": "#F1EFEC",
+        "eyebrow": "Fabric First",
+        "headline": "Mornings Made Soft",
+        "body": "<p>No polyester. No shortcuts. Every Néroli piece is cut from genuine, breathable natural fabric — gentle on your skin from the first stretch of morning to the last quiet moment of night.</p>",
+        "padding_top": 24,
+        "padding_bottom": 24
+      }
+    },
+    "pajama_showcase_section": {
+      "type": "pajama-showcase",
+      "blocks": {
+        "tile_1": {
+          "type": "tile",
+          "settings": {
+            "name": "Auri Set",
+            "image": "shopify://shop_images/WhatsAppImage2026-08-31at17.29.19.jpg",
+            "link": "shopify://products/auri-set-white-pointelle"
+          }
+        },
+        "tile_2": { "type": "tile", "settings": { "name": "Linen Drift" } },
+        "tile_3": { "type": "tile", "settings": { "name": "Cloud Nine" } },
+        "tile_4": { "type": "tile", "settings": { "name": "Sable Stripe" } },
+        "tile_5": { "type": "tile", "settings": { "name": "Dawn Robe" } },
+        "tile_6": { "type": "tile", "settings": { "name": "Blush Bloom" } },
+        "tile_7": { "type": "tile", "settings": { "name": "Ivory Rest" } }
+      },
+      "block_order": ["tile_1", "tile_2", "tile_3", "tile_4", "tile_5", "tile_6", "tile_7"],
+      "name": "Pajama showcase",
+      "settings": {
+        "heading": "This Season's Favorites",
+        "padding_top": 48,
+        "padding_bottom": 64
+      }
+    },
+    "founder_letter_section": {
+      "type": "founder-letter",
+      "name": "Founder letter",
+      "settings": {
+        "image": "shopify://shop_images/neroli-founder-portrait.jpg",
+        "pullquote": "Every stitch we choose is a quiet promise: comfort should never be compromised.",
+        "short_quote": "I didn't set out to build a fashion brand. I set out to build a bedtime ritual worth keeping.",
+        "body_1": "<p>Néroli began with a simple frustration: sleepwear that looked beautiful in photos but felt like a compromise in real life. Scratchy seams, synthetic fabric, fits that never quite matched the body they were meant for.</p>",
+        "body_2": "<p>So we started over — sourcing real, breathable fabric, fitting each piece on real bodies, and refusing to rush a single sample. What you're wearing tonight is the result of that stubbornness, and we hope you can feel it.</p>",
+        "founder_name": "Noa Amrani",
+        "accent_color": "#B98B4E",
+        "background_color": "#FBF7F2",
+        "padding_top": 48,
+        "padding_bottom": 48
+      }
+    }
+  },
+  "order": [
+    "hero_jVaWmY",
+    "fabric_story_section",
+    "pajama_showcase_section",
+    "founder_letter_section"
+  ]
+}

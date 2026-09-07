@@ -1,0 +1,205 @@
+
+
+<div
+  class="fabric-story"
+  style="
+    padding-block-start: {{ section.settings.padding_top }}px;
+    padding-block-end: {{ section.settings.padding_bottom }}px;
+  "
+>
+  <div class="fabric-story__container">
+    <div class="fabric-story__grid">
+      <div class="fabric-story__media">
+        {%- if section.settings.image != blank -%}
+          {{
+            section.settings.image
+            | image_url: width: 1600
+            | image_tag:
+              width: section.settings.image.width,
+              height: section.settings.image.height,
+              widths: '400, 600, 800, 1000, 1200, 1600',
+              sizes: '(min-width: 750px) 50vw, 100vw',
+              class: 'fabric-story__image',
+              alt: section.settings.image.alt,
+              loading: 'lazy'
+          }}
+        {%- else -%}
+          {{ 'lifestyle-1' | placeholder_svg_tag: 'fabric-story__image fabric-story__image--placeholder' }}
+        {%- endif -%}
+      </div>
+
+      <div
+        class="fabric-story__content"
+        style="--fabric-story-bg: {{ section.settings.background_color }};"
+      >
+        <div class="fabric-story__content-inner">
+          {%- if section.settings.eyebrow != blank -%}
+            <p class="fabric-story__eyebrow">{{ section.settings.eyebrow }}</p>
+          {%- endif -%}
+          {%- if section.settings.headline != blank -%}
+            <h2 class="fabric-story__headline">{{ section.settings.headline }}</h2>
+          {%- endif -%}
+          {%- if section.settings.body != blank -%}
+            <div class="fabric-story__body">{{ section.settings.body }}</div>
+          {%- endif -%}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% stylesheet %}
+  .fabric-story {
+    background: var(--color-background);
+  }
+
+  .fabric-story__container {
+    max-width: 1400px;
+    margin-inline: auto;
+    padding-inline: clamp(16px, 4vw, 48px);
+  }
+
+  .fabric-story__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(24px, 3vw, 40px);
+  }
+
+  .fabric-story__media {
+    display: block;
+  }
+
+  .fabric-story__image {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .fabric-story__content {
+    height: 100%;
+    background: var(--fabric-story-bg, #F1EFEC);
+  }
+
+  .fabric-story__content-inner {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1.25rem;
+    padding: clamp(2rem, 4vw, 4rem);
+  }
+
+  .fabric-story__eyebrow {
+    margin: 0;
+    font-family: var(--font-body--family);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgb(var(--color-foreground-rgb) / 0.7);
+  }
+
+  .fabric-story__headline {
+    margin: 0;
+    font-family: var(--font-heading--family);
+    font-size: clamp(2rem, 1.3rem + 3vw, 3.25rem);
+    line-height: 1.1;
+    color: var(--color-foreground);
+  }
+
+  .fabric-story__body {
+    margin: 0;
+    font-family: var(--font-body--family);
+    font-size: clamp(1rem, 0.9rem + 0.4vw, 1.1875rem);
+    line-height: 1.7;
+    color: rgb(var(--color-foreground-rgb) / 0.85);
+  }
+
+  .fabric-story__body p {
+    margin: 0;
+  }
+
+  @media screen and (max-width: 749px) {
+    .fabric-story__grid {
+      grid-template-columns: 1fr;
+    }
+
+    .fabric-story__content-inner {
+      padding: 2rem;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Fabric story",
+  "tag": "section",
+  "class": "section-wrapper",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Text panel background color",
+      "info": "Applies to the text column only, not the full section.",
+      "default": "#F1EFEC"
+    },
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Fabric First"
+    },
+    {
+      "type": "text",
+      "id": "headline",
+      "label": "Headline",
+      "default": "Mornings Made Soft"
+    },
+    {
+      "type": "richtext",
+      "id": "body",
+      "label": "Body text",
+      "default": "<p>No polyester. No shortcuts. Every Néroli piece is cut from genuine, breathable natural fabric — gentle on your skin from the first stretch of morning to the last quiet moment of night.</p>"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 150,
+      "step": 2,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 150,
+      "step": 2,
+      "unit": "px",
+      "default": 24
+    }
+  ],
+  "presets": [
+    {
+      "name": "Fabric story",
+      "category": "Storytelling"
+    }
+  ]
+}
+{% endschema %}

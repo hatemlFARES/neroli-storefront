@@ -1,0 +1,9 @@
+# Local reference/source assets — already uploaded to Shopify, not theme code
+inspiration/
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Shopify CLI local state
+.shopify/
