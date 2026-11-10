@@ -1,0 +1,252 @@
+{%- comment -%}
+  Lookbook gallery: edge-to-edge rows with zero gaps.
+  Every photo in a row gets the same height and keeps its own shape (no cropping on desktop),
+  because each item's width grows in proportion to its aspect ratio.
+  Tick "Start a new row" on a photo to begin the next row with it.
+{%- endcomment -%}
+
+<div
+  class="lookbook-gallery"
+  style="
+    padding-block-start: {{ section.settings.padding_top }}px;
+    padding-block-end: {{ section.settings.padding_bottom }}px;
+  "
+>
+  {%- if section.settings.heading != blank -%}
+    <h2 class="lookbook-gallery__heading">{{ section.settings.heading }}</h2>
+  {%- endif -%}
+
+  <div class="lookbook-gallery__rows">
+    <div class="lookbook-gallery__row">
+      {%- for block in section.blocks -%}
+        {%- liquid
+          if block.settings.new_row and forloop.first == false
+            echo '</div><div class="lookbook-gallery__row">'
+          endif
+
+          assign img = block.settings.image
+          assign ar = 1.5
+          if img != blank
+            assign ar = img.aspect_ratio
+          endif
+
+          assign shape = 'landscape'
+          if ar < 0.95
+            assign shape = 'portrait'
+          elsif ar < 1.05
+            assign shape = 'square'
+          endif
+
+          assign img_style = 'object-position: ' | append: block.settings.focus_x | append: '% ' | append: block.settings.focus_y | append: '%;'
+          assign tag = 'div'
+          if block.settings.link != blank
+            assign tag = 'a'
+          endif
+        -%}
+        <{{ tag }}
+          class="lookbook-gallery__item lookbook-gallery__item--{{ shape }}"
+          style="--lg-ar: {{ ar }};"
+          {% if tag == 'a' %}href="{{ block.settings.link }}"{% endif %}
+          {{ block.shopify_attributes }}
+        >
+          {%- if img != blank -%}
+            {{
+              img
+              | image_url: width: 2000
+              | image_tag:
+                widths: '500, 750, 1000, 1400, 2000',
+                sizes: '(min-width: 750px) 50vw, 100vw',
+                class: 'lookbook-gallery__image',
+                style: img_style,
+                loading: 'lazy'
+            }}
+          {%- else -%}
+            {{ 'lifestyle-1' | placeholder_svg_tag: 'lookbook-gallery__image lookbook-gallery__image--placeholder' }}
+          {%- endif -%}
+        </{{ tag }}>
+      {%- endfor -%}
+    </div>
+  </div>
+</div>
+
+{% stylesheet %}
+  .lookbook-gallery {
+    background: var(--color-background);
+  }
+
+  .lookbook-gallery__heading {
+    margin: 0 0 clamp(20px, 3vw, 36px);
+    padding-inline: 16px;
+    font-family: var(--font-heading--family);
+    font-size: clamp(1.75rem, 1.3rem + 2vw, 2.5rem);
+    text-align: center;
+    color: var(--color-foreground);
+  }
+
+  .lookbook-gallery__rows {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  /* Justified row: widths are proportional to aspect ratio, so heights match exactly. */
+  .lookbook-gallery__row {
+    display: flex;
+    gap: 0;
+  }
+
+  .lookbook-gallery__item {
+    position: relative;
+    display: block;
+    flex: var(--lg-ar) 1 0;
+    min-width: 0;
+    aspect-ratio: var(--lg-ar);
+    overflow: hidden;
+    margin: 0;
+  }
+
+  .lookbook-gallery__image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 1.6s cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+
+  .lookbook-gallery__image--placeholder {
+    background: rgb(var(--color-foreground-rgb) / 0.06);
+  }
+
+  @media (hover: hover) {
+    .lookbook-gallery__item:hover .lookbook-gallery__image {
+      transform: scale(1.04);
+    }
+  }
+
+  /* Mobile: landscape and square photos go full width; portraits pair up side by side. */
+  @media screen and (max-width: 749px) {
+    .lookbook-gallery__row {
+      flex-wrap: wrap;
+    }
+
+    .lookbook-gallery__item {
+      flex: 1 1 100%;
+    }
+
+    .lookbook-gallery__item--portrait {
+      flex: 1 1 50%;
+      aspect-ratio: 7 / 10;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lookbook-gallery__image {
+      transition: none;
+    }
+
+    .lookbook-gallery__item:hover .lookbook-gallery__image {
+      transform: none;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Lookbook gallery",
+  "tag": "section",
+  "class": "section-wrapper",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "info": "Optional. Leave empty for photos only."
+    },
+    {
+      "type": "paragraph",
+      "content": "Photos in the same row line up at the same height without cropping. Tick \"Start a new row\" on a photo to begin the next row."
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 150,
+      "step": 2,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 150,
+      "step": 2,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "blocks": [
+    {
+      "type": "photo",
+      "name": "Photo",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "checkbox",
+          "id": "new_row",
+          "label": "Start a new row",
+          "default": false
+        },
+        {
+          "type": "range",
+          "id": "focus_x",
+          "label": "Crop focus left ↔ right",
+          "info": "Only used where the photo gets cropped (portraits on mobile).",
+          "min": 0,
+          "max": 100,
+          "step": 5,
+          "unit": "%",
+          "default": 50
+        },
+        {
+          "type": "range",
+          "id": "focus_y",
+          "label": "Crop focus top ↕ bottom",
+          "min": 0,
+          "max": 100,
+          "step": 5,
+          "unit": "%",
+          "default": 50
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link",
+          "info": "Optional."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Lookbook gallery",
+      "category": "Image",
+      "blocks": [
+        { "type": "photo" },
+        { "type": "photo" },
+        { "type": "photo" }
+      ]
+    }
+  ]
+}
+{% endschema %}

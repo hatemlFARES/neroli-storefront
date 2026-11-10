@@ -1,0 +1,205 @@
+{%- comment -%}
+  Product details as "+" accordions: Description / Material & Care / Fit & Measurement.
+  The product description is split automatically, paragraph by paragraph:
+  - lines with "Fit reference" or "Sizing advice"      -> Fit & Measurement
+  - from the "Material" or "CARE" line onwards          -> Material & Care
+  - everything else                                     -> Description
+  A section with no content is not shown.
+{%- endcomment -%}
+
+{% capture nl %}
+{% endcapture %}
+{%- liquid
+  assign product = closest.product
+  assign desc_html = ''
+  assign care_html = ''
+  assign fit_html = ''
+  assign mode = 'desc'
+
+  if product != blank
+    assign lines = product.description | split: nl
+    for line in lines
+      assign trimmed = line | strip
+      if trimmed == blank
+        continue
+      endif
+
+      assign plain = trimmed | strip_html | strip | downcase
+      assign plain_start = plain | slice: 0, 8
+
+      if plain contains 'fit reference' or plain contains 'sizing advice'
+        assign fit_html = fit_html | append: trimmed
+        continue
+      endif
+
+      if plain_start == 'material' or plain_start == 'care' or plain contains 'care:'
+        assign mode = 'care'
+      endif
+
+      if mode == 'care'
+        assign care_html = care_html | append: trimmed
+      else
+        assign desc_html = desc_html | append: trimmed
+      endif
+    endfor
+  endif
+
+  if block.settings.extra_fit != blank
+    assign fit_html = fit_html | append: block.settings.extra_fit
+  endif
+
+  assign care_check = care_html | strip_html | strip
+  assign desc_check = desc_html | strip_html | strip
+  assign fit_check = fit_html | strip_html | strip
+-%}
+
+<div class="neroli-accordion" {{ block.shopify_attributes }}>
+  {%- if desc_check != blank -%}
+    <details class="neroli-accordion__row"{% if block.settings.open_first %} open{% endif %}>
+      <summary class="neroli-accordion__summary">
+        <span class="neroli-accordion__icon" aria-hidden="true"></span>
+        {{ block.settings.description_label }}
+      </summary>
+      <div class="neroli-accordion__content rte">{{ desc_html }}</div>
+    </details>
+  {%- endif -%}
+
+  {%- if care_check != blank -%}
+    <details class="neroli-accordion__row">
+      <summary class="neroli-accordion__summary">
+        <span class="neroli-accordion__icon" aria-hidden="true"></span>
+        {{ block.settings.care_label }}
+      </summary>
+      <div class="neroli-accordion__content rte">{{ care_html }}</div>
+    </details>
+  {%- endif -%}
+
+  {%- if fit_check != blank -%}
+    <details class="neroli-accordion__row">
+      <summary class="neroli-accordion__summary">
+        <span class="neroli-accordion__icon" aria-hidden="true"></span>
+        {{ block.settings.fit_label }}
+      </summary>
+      <div class="neroli-accordion__content rte">{{ fit_html }}</div>
+    </details>
+  {%- endif -%}
+</div>
+
+{% stylesheet %}
+  .neroli-accordion {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-block-start: 24px;
+  }
+
+  .neroli-accordion__summary {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding-block: 12px;
+    font-size: var(--font-size--sm, 0.875rem);
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .neroli-accordion__summary::-webkit-details-marker {
+    display: none;
+  }
+
+  /* Plus sign that turns into a minus when open */
+  .neroli-accordion__icon {
+    position: relative;
+    flex: 0 0 12px;
+    width: 12px;
+    height: 12px;
+  }
+
+  .neroli-accordion__icon::before,
+  .neroli-accordion__icon::after {
+    content: '';
+    position: absolute;
+    inset: 50% 0 auto;
+    height: 1px;
+    background: currentColor;
+    transition: transform 0.25s ease;
+  }
+
+  .neroli-accordion__icon::after {
+    transform: rotate(90deg);
+  }
+
+  .neroli-accordion__row[open] .neroli-accordion__icon::after {
+    transform: rotate(0deg);
+  }
+
+  .neroli-accordion__content {
+    padding: 2px 0 16px 26px;
+    font-size: var(--font-size--sm, 0.875rem);
+    line-height: 1.65;
+    color: rgb(var(--color-foreground-rgb) / 0.8);
+  }
+
+  .neroli-accordion__content :is(p, ul) {
+    margin: 0 0 8px;
+  }
+
+  .neroli-accordion__content ul {
+    padding-inline-start: 18px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .neroli-accordion__icon::before,
+    .neroli-accordion__icon::after {
+      transition: none;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Product details (Néroli)",
+  "tag": null,
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Splits the product description into three sections. Lines with \"Fit reference\" or \"Sizing advice\" go to Fit, and everything from the \"Material\" or \"CARE\" line onwards goes to Material & Care."
+    },
+    {
+      "type": "text",
+      "id": "description_label",
+      "label": "Description label",
+      "default": "Description"
+    },
+    {
+      "type": "text",
+      "id": "care_label",
+      "label": "Material & care label",
+      "default": "Material & Care"
+    },
+    {
+      "type": "text",
+      "id": "fit_label",
+      "label": "Fit label",
+      "default": "Fit & Measurement"
+    },
+    {
+      "type": "richtext",
+      "id": "extra_fit",
+      "label": "Extra fit text",
+      "info": "Optional. Added under Fit & Measurement on every product."
+    },
+    {
+      "type": "checkbox",
+      "id": "open_first",
+      "label": "Open Description by default",
+      "default": false
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product details (Néroli)"
+    }
+  ]
+}
+{% endschema %}

@@ -1,59 +1,167 @@
-
-
-{% liquid
+{%- liquid
   assign placeholder_names = 'apparel-1,apparel-2,apparel-3,apparel-4' | split: ','
-%}
+  assign per_view = section.settings.tiles_per_view
+-%}
 
-<div
-  class="pajama-showcase"
+<pajama-carousel
+  class="pajama-showcase pajama-showcase--{{ section.settings.layout }}"
   style="
+    --ps-per-view: {{ per_view }};
     padding-block-start: {{ section.settings.padding_top }}px;
     padding-block-end: {{ section.settings.padding_bottom }}px;
   "
 >
   <div class="pajama-showcase__container">
-    {%- if section.settings.heading != blank -%}
-      <h2 class="pajama-showcase__heading">{{ section.settings.heading }}</h2>
-    {%- endif -%}
+    <div class="pajama-showcase__header">
+      {%- if section.settings.heading != blank -%}
+        <h2 class="pajama-showcase__heading">{{ section.settings.heading }}</h2>
+      {%- endif -%}
+      <div class="pajama-showcase__arrows">
+        <button type="button" class="pajama-showcase__arrow" data-prev aria-label="Previous" disabled>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
+        </button>
+        <button type="button" class="pajama-showcase__arrow" data-next aria-label="Next">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg>
+        </button>
+      </div>
+    </div>
 
-    <div class="pajama-showcase__grid">
+    <ul class="pajama-showcase__track" data-track role="list">
       {%- for block in section.blocks -%}
         {%- liquid
           assign placeholder_index = forloop.index0 | modulo: 4
           assign placeholder_name = placeholder_names[placeholder_index]
+
+          # Manual settings win; otherwise fall back to the picked product.
+          assign tile_product = block.settings.product
+          assign tile_name = block.settings.name | default: tile_product.title
+          assign tile_link = block.settings.link | default: tile_product.url | default: '#'
+
+          if block.settings.image != blank
+            assign tile_image = block.settings.image
+            assign tile_hover = tile_product.featured_image
+          else
+            assign tile_image = tile_product.featured_image
+            assign tile_hover = tile_product.images[1]
+          endif
         -%}
-        <a
-          href="{{ block.settings.link | default: '#' }}"
-          class="pajama-showcase__tile"
-          {{ block.shopify_attributes }}
-        >
-          {%- if block.settings.image != blank -%}
-            {{
-              block.settings.image
-              | image_url: width: 1200
-              | image_tag:
-                widths: '400, 600, 800, 1000, 1200',
-                sizes: '(min-width: 990px) 25vw, (min-width: 750px) 33vw, 50vw',
-                class: 'pajama-showcase__image',
-                alt: block.settings.name,
-                loading: 'lazy'
-            }}
-          {%- else -%}
-            {{ placeholder_name | placeholder_svg_tag: 'pajama-showcase__image pajama-showcase__image--placeholder' }}
-          {%- endif -%}
-          <span class="pajama-showcase__scrim"></span>
-          {%- if block.settings.name != blank -%}
-            <span class="pajama-showcase__name">{{ block.settings.name }}</span>
-          {%- endif -%}
-        </a>
+        <li class="pajama-showcase__slide" {{ block.shopify_attributes }}>
+          <a
+            href="{{ tile_link }}"
+            class="pajama-showcase__tile{% if tile_hover != blank %} pajama-showcase__tile--has-hover{% endif %}"
+          >
+            <div class="pajama-showcase__media">
+              {%- if tile_image != blank -%}
+                {{
+                  tile_image
+                  | image_url: width: 1200
+                  | image_tag:
+                    widths: '400, 600, 800, 1000, 1200',
+                    sizes: '(min-width: 990px) 25vw, (min-width: 750px) 40vw, 75vw',
+                    class: 'pajama-showcase__image pajama-showcase__image--primary',
+                    alt: tile_name,
+                    loading: 'lazy'
+                }}
+                {%- if tile_hover != blank -%}
+                  {{
+                    tile_hover
+                    | image_url: width: 1200
+                    | image_tag:
+                      widths: '400, 600, 800, 1000, 1200',
+                      sizes: '(min-width: 990px) 25vw, (min-width: 750px) 40vw, 75vw',
+                      class: 'pajama-showcase__image pajama-showcase__image--hover',
+                      alt: '',
+                      loading: 'lazy'
+                  }}
+                {%- endif -%}
+              {%- else -%}
+                {{ placeholder_name | placeholder_svg_tag: 'pajama-showcase__image pajama-showcase__image--placeholder' }}
+              {%- endif -%}
+              <span class="pajama-showcase__scrim"></span>
+
+              <div class="pajama-showcase__info">
+                {%- if tile_name != blank -%}
+                  <span class="pajama-showcase__name">{{ tile_name }}</span>
+                {%- endif -%}
+                {%- if section.settings.show_price and tile_product != blank -%}
+                  <span class="pajama-showcase__price">{{ tile_product.price | money }}</span>
+                {%- endif -%}
+                <span class="pajama-showcase__cta">{{ section.settings.cta_label }}</span>
+              </div>
+            </div>
+          </a>
+        </li>
       {%- endfor -%}
+    </ul>
+
+    <div class="pajama-showcase__progress" aria-hidden="true">
+      <span class="pajama-showcase__progress-bar" data-bar></span>
     </div>
   </div>
-</div>
+</pajama-carousel>
+
+{% javascript %}
+  if (!customElements.get('pajama-carousel')) {
+    class PajamaCarousel extends HTMLElement {
+      connectedCallback() {
+        this.track = this.querySelector('[data-track]');
+        this.prev = this.querySelector('[data-prev]');
+        this.next = this.querySelector('[data-next]');
+        this.bar = this.querySelector('[data-bar]');
+        if (!this.track) return;
+
+        this.update = this.update.bind(this);
+        this.track.addEventListener('scroll', this.update, { passive: true });
+        this.prev?.addEventListener('click', () => this.step(-1));
+        this.next?.addEventListener('click', () => this.step(1));
+        this.resizeObserver = new ResizeObserver(this.update);
+        this.resizeObserver.observe(this.track);
+        this.update();
+      }
+
+      disconnectedCallback() {
+        this.resizeObserver?.disconnect();
+      }
+
+      get dir() {
+        return getComputedStyle(this.track).direction === 'rtl' ? -1 : 1;
+      }
+
+      step(direction) {
+        const slide = this.track.querySelector('.pajama-showcase__slide');
+        const gap = parseFloat(getComputedStyle(this.track).columnGap) || 0;
+        const slideWidth = slide ? slide.getBoundingClientRect().width + gap : this.track.clientWidth;
+        const visible = Math.max(1, Math.floor((this.track.clientWidth + gap) / slideWidth));
+        this.track.scrollBy({ left: direction * this.dir * slideWidth * visible, behavior: 'smooth' });
+      }
+
+      update() {
+        const { scrollWidth, clientWidth } = this.track;
+        const max = Math.max(0, scrollWidth - clientWidth);
+        const pos = Math.abs(this.track.scrollLeft);
+        const ratio = scrollWidth ? clientWidth / scrollWidth : 1;
+
+        if (this.prev) this.prev.disabled = pos <= 2;
+        if (this.next) this.next.disabled = pos >= max - 2;
+        this.toggleAttribute('data-static', max <= 2);
+
+        if (this.bar) {
+          const progress = max ? pos / max : 0;
+          this.bar.style.width = `${ratio * 100}%`;
+          this.bar.style.transform = `translateX(${this.dir * progress * (1 / ratio - 1) * 100}%)`;
+        }
+      }
+    }
+    customElements.define('pajama-carousel', PajamaCarousel);
+  }
+{% endjavascript %}
 
 {% stylesheet %}
   .pajama-showcase {
+    display: block;
     background: var(--color-background);
+    --ps-gap: clamp(12px, 1.5vw, 24px);
+    --ps-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
   }
 
   .pajama-showcase__container {
@@ -62,66 +170,275 @@
     padding-inline: clamp(16px, 4vw, 48px);
   }
 
+  .pajama-showcase__header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    margin-block-end: clamp(20px, 3vw, 36px);
+  }
+
   .pajama-showcase__heading {
-    margin: 0 0 clamp(24px, 3vw, 40px);
+    margin: 0;
     font-family: var(--font-heading--family);
     font-size: clamp(1.75rem, 1.3rem + 2vw, 2.5rem);
-    text-align: center;
     color: var(--color-foreground);
   }
 
-  .pajama-showcase__grid {
+  .pajama-showcase__arrows {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .pajama-showcase__arrow {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: clamp(12px, 1.5vw, 24px);
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 1px solid rgb(var(--color-foreground-rgb) / 0.2);
+    border-radius: 50%;
+    background: transparent;
+    color: var(--color-foreground);
+    cursor: pointer;
+    transition: background-color 0.25s, color 0.25s, border-color 0.25s, opacity 0.25s;
+  }
+
+  .pajama-showcase__arrow svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  [dir='rtl'] .pajama-showcase__arrow svg {
+    transform: scaleX(-1);
+  }
+
+  .pajama-showcase__arrow:not(:disabled):hover {
+    background: var(--color-foreground);
+    border-color: var(--color-foreground);
+    color: var(--color-background);
+  }
+
+  .pajama-showcase__arrow:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+
+  .pajama-showcase[data-static] .pajama-showcase__arrows,
+  .pajama-showcase[data-static] .pajama-showcase__progress {
+    visibility: hidden;
+  }
+
+  .pajama-showcase__track {
+    display: grid;
+    grid-auto-flow: column;
+    /* Show N tiles plus a peek of the next one so it reads as scrollable. */
+    grid-auto-columns: calc((100% - var(--ps-gap) * var(--ps-per-view)) / (var(--ps-per-view) + 0.25));
+    gap: var(--ps-gap);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+  }
+
+  .pajama-showcase__track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .pajama-showcase__slide {
+    scroll-snap-align: start;
+    min-width: 0;
   }
 
   .pajama-showcase__tile {
-    position: relative;
     display: block;
-    aspect-ratio: 3 / 4;
-    overflow: hidden;
+    color: inherit;
     text-decoration: none;
   }
 
+  .pajama-showcase__media {
+    position: relative;
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+    background: rgb(var(--color-foreground-rgb) / 0.05);
+  }
+
   .pajama-showcase__image {
+    position: absolute;
+    inset: 0;
     display: block;
     width: 100%;
     height: 100%;
     object-fit: cover;
     object-position: center center;
+    transition: opacity 0.6s var(--ps-ease), transform 1.2s var(--ps-ease);
   }
 
-  .pajama-showcase__image--placeholder {
-    background: rgb(var(--color-foreground-rgb) / 0.06);
+  .pajama-showcase__image--hover {
+    opacity: 0;
   }
 
   .pajama-showcase__scrim {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to top, rgb(0 0 0 / 0.35), rgb(0 0 0 / 0) 45%);
+    background: linear-gradient(to top, rgb(0 0 0 / 0.45), rgb(0 0 0 / 0) 50%);
+    pointer-events: none;
+  }
+
+  .pajama-showcase__info {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 0 16px clamp(16px, 2.5vw, 24px);
+    color: #ffffff;
+    text-align: center;
     pointer-events: none;
   }
 
   .pajama-showcase__name {
-    position: absolute;
-    left: 50%;
-    bottom: clamp(16px, 3vw, 28px);
-    transform: translateX(-50%);
-    max-width: 90%;
     font-family: var(--font-heading--family);
     font-weight: 700;
     font-size: clamp(1rem, 0.85rem + 0.6vw, 1.375rem);
     letter-spacing: 0.02em;
     text-transform: uppercase;
-    color: #ffffff;
-    text-align: center;
     text-wrap: balance;
   }
 
+  .pajama-showcase__price {
+    font-size: 0.875rem;
+    letter-spacing: 0.04em;
+    opacity: 0.9;
+  }
+
+  .pajama-showcase__cta {
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    border-bottom: 1px solid currentColor;
+    padding-bottom: 2px;
+    margin-top: 6px;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.4s var(--ps-ease), transform 0.4s var(--ps-ease);
+  }
+
+  .pajama-showcase__name,
+  .pajama-showcase__price {
+    transition: transform 0.4s var(--ps-ease);
+  }
+
+  /* Hover only on devices with a real pointer, so phones don't get stuck states. */
+  @media (hover: hover) {
+    .pajama-showcase__tile--has-hover:hover .pajama-showcase__image--hover {
+      opacity: 1;
+    }
+
+    .pajama-showcase__tile:hover .pajama-showcase__image {
+      transform: scale(1.04);
+    }
+
+    .pajama-showcase__tile:hover .pajama-showcase__cta {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .pajama-showcase__tile:hover .pajama-showcase__name,
+    .pajama-showcase__tile:hover .pajama-showcase__price {
+      transform: translateY(-4px);
+    }
+  }
+
+  .pajama-showcase__tile:focus-visible {
+    outline: 2px solid var(--color-foreground);
+    outline-offset: 3px;
+  }
+
+  .pajama-showcase__tile--has-hover:focus-visible .pajama-showcase__image--hover,
+  .pajama-showcase__tile:focus-visible .pajama-showcase__cta {
+    opacity: 1;
+    transform: none;
+  }
+
+  .pajama-showcase__progress {
+    position: relative;
+    height: 2px;
+    margin-block-start: clamp(20px, 3vw, 32px);
+    background: rgb(var(--color-foreground-rgb) / 0.12);
+    overflow: hidden;
+  }
+
+  .pajama-showcase__progress-bar {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    width: 25%;
+    background: var(--color-foreground);
+    transition: transform 0.15s linear;
+  }
+
+  /* Grid layout: every tile visible, no scrolling, centered heading. */
+  .pajama-showcase--grid .pajama-showcase__header {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .pajama-showcase--grid .pajama-showcase__arrows,
+  .pajama-showcase--grid .pajama-showcase__progress {
+    display: none;
+  }
+
+  .pajama-showcase--grid .pajama-showcase__track {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(var(--ps-per-view), minmax(0, 1fr));
+    grid-auto-columns: auto;
+    overflow: visible;
+    scroll-snap-type: none;
+  }
+
   @media screen and (max-width: 989px) {
-    .pajama-showcase__grid {
-      grid-template-columns: repeat(2, 1fr);
+    .pajama-showcase {
+      --ps-per-view: 2 !important;
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .pajama-showcase--carousel {
+      --ps-per-view: 1.2 !important;
+    }
+
+    .pajama-showcase__arrows {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pajama-showcase__track {
+      scroll-behavior: auto;
+    }
+
+    .pajama-showcase__image,
+    .pajama-showcase__cta,
+    .pajama-showcase__name,
+    .pajama-showcase__price {
+      transition: none;
+    }
+
+    .pajama-showcase__tile:hover .pajama-showcase__image {
+      transform: none;
     }
   }
 {% endstylesheet %}
@@ -137,6 +454,37 @@
       "id": "heading",
       "label": "Heading",
       "default": "This Season's Favorites"
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Layout",
+      "options": [
+        { "value": "grid", "label": "Grid" },
+        { "value": "carousel", "label": "Sliding row" }
+      ],
+      "default": "grid"
+    },
+    {
+      "type": "range",
+      "id": "tiles_per_view",
+      "label": "Tiles per row on desktop",
+      "min": 3,
+      "max": 5,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "checkbox",
+      "id": "show_price",
+      "label": "Show price",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "Hover label",
+      "default": "Shop now"
     },
     {
       "type": "header",
@@ -169,20 +517,28 @@
       "name": "Pajama tile",
       "settings": [
         {
+          "type": "product",
+          "id": "product",
+          "label": "Product",
+          "info": "Fills the image, name, price and link automatically. The product's second photo is shown on hover."
+        },
+        {
           "type": "image_picker",
           "id": "image",
-          "label": "Image"
+          "label": "Image",
+          "info": "Optional. Defaults to the product's featured image."
         },
         {
           "type": "text",
           "id": "name",
           "label": "Name",
-          "default": "Pajama Set"
+          "info": "Optional. Defaults to the product title."
         },
         {
           "type": "url",
           "id": "link",
-          "label": "Link"
+          "label": "Link",
+          "info": "Optional. Defaults to the product page."
         }
       ]
     }
@@ -192,13 +548,10 @@
       "name": "Pajama showcase",
       "category": "Product",
       "blocks": [
-        { "type": "tile", "settings": { "name": "Moonlight Set" } },
-        { "type": "tile", "settings": { "name": "Linen Drift" } },
-        { "type": "tile", "settings": { "name": "Cloud Nine" } },
-        { "type": "tile", "settings": { "name": "Sable Stripe" } },
-        { "type": "tile", "settings": { "name": "Dawn Robe" } },
-        { "type": "tile", "settings": { "name": "Blush Bloom" } },
-        { "type": "tile", "settings": { "name": "Ivory Rest" } }
+        { "type": "tile" },
+        { "type": "tile" },
+        { "type": "tile" },
+        { "type": "tile" }
       ]
     }
   ]

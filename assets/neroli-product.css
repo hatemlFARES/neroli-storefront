@@ -1,0 +1,67 @@
+/*
+  Néroli product page styling (loaded only on product pages, see snippets/stylesheets.liquid).
+  Layout: tall photo thumbnails on the left, one large photo, details column on the right
+  with a full-width black "Add to cart" button and "+" detail sections.
+*/
+
+/* ---------- Gallery: larger thumbnails on the left ---------- */
+@media screen and (min-width: 750px) {
+  .product-information media-gallery {
+    --thumbnail-width: clamp(72px, 9vw, 140px);
+  }
+
+  .product-information media-gallery .slideshow-controls__thumbnails {
+    gap: 10px;
+  }
+
+  .product-information media-gallery .slideshow-controls__thumbnails .slideshow-control {
+    width: var(--thumbnail-width);
+    opacity: 0.75;
+    transition: opacity 0.2s ease;
+  }
+
+  .product-information media-gallery .slideshow-controls__thumbnails .slideshow-control:hover,
+  .product-information media-gallery .slideshow-controls__thumbnails .slideshow-control[aria-selected='true'] {
+    opacity: 1;
+  }
+
+  .product-information media-gallery .slideshow-controls__thumbnails .slideshow-control[aria-selected='true'] {
+    outline: 1px solid var(--color-foreground);
+    outline-offset: 0;
+    border: 0;
+  }
+}
+
+/* ---------- Details column ---------- */
+.product-information .product-details .price {
+  color: rgb(var(--color-foreground-rgb) / 0.7);
+}
+
+/* Size buttons: small squares with a thin light border; the chosen size gets a dark border */
+.product-information .variant-option--buttons legend {
+  font-size: var(--font-size--sm, 0.875rem);
+}
+
+.product-information .variant-option--buttons .variant-option__button-label {
+  flex: 0 0 auto;
+  min-width: 40px;
+  min-height: 36px;
+  padding: 6px 10px;
+  font-size: 0.8125rem;
+}
+
+/* Only "Add to cart": no quantity box, no express checkout buttons */
+.product-information .product-details .quantity-selector-wrapper,
+.product-information .product-details .accelerated-checkout-block {
+  display: none;
+}
+
+.product-information .product-details .add-to-cart-button {
+  width: 100%;
+  min-height: 48px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+

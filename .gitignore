@@ -7,3 +7,7 @@ Thumbs.db
 
 # Shopify CLI local state
 .shopify/
+
+# Raw lifestyle photos (already uploaded to Shopify Files) and design reference screenshots
+neroli shopify photos/
+templates example/

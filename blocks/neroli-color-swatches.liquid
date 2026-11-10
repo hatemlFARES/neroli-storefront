@@ -1,0 +1,165 @@
+{%- comment -%}
+  Color swatches that link sibling products.
+  Néroli sells each color as its own product ("Luma set - Black", "Luma set - Blush"),
+  so products whose title starts with the same first word are shown as color options.
+  The color name is the part of the title after the dash (or the product's Color option).
+{%- endcomment -%}
+
+{%- liquid
+  assign current = closest.product
+  assign family = current.title | split: ' ' | first | downcase
+
+  assign source = block.settings.collection
+  if source == blank
+    assign source = collections.all
+  endif
+
+  assign siblings_count = 0
+  for p in source.products
+    assign p_family = p.title | split: ' ' | first | downcase
+    if p_family == family
+      assign siblings_count = siblings_count | plus: 1
+    endif
+  endfor
+
+  assign show = true
+  if siblings_count < 2 and block.settings.hide_when_single
+    assign show = false
+  endif
+-%}
+
+{%- if show and current != blank -%}
+  <div class="neroli-swatches" {{ block.shopify_attributes }}>
+    {%- capture current_label -%}{%- render 'neroli-color-name', product: current -%}{%- endcapture -%}
+    {%- assign current_label = current_label | strip -%}
+    <p class="neroli-swatches__label">
+      {{ block.settings.label }}
+      {%- if current_label != blank %} <span class="neroli-swatches__value">{{ current_label }}</span>{% endif -%}
+    </p>
+
+    <div class="neroli-swatches__list">
+      {%- if siblings_count == 0 -%}
+        {%- render 'neroli-color-swatch', product: current, current: current -%}
+      {%- else -%}
+        {%- for p in source.products -%}
+          {%- assign p_family = p.title | split: ' ' | first | downcase -%}
+          {%- if p_family == family -%}
+            {%- render 'neroli-color-swatch', product: p, current: current -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
+    </div>
+  </div>
+{%- endif -%}
+
+{% stylesheet %}
+  .neroli-swatches {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .neroli-swatches__label {
+    margin: 0;
+    font-size: var(--font-size--sm, 0.875rem);
+  }
+
+  .neroli-swatches__value {
+    color: rgb(var(--color-foreground-rgb) / 0.65);
+  }
+
+  .neroli-swatches__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .neroli-swatches__item {
+    position: relative;
+    display: block;
+    width: 68px;
+    aspect-ratio: 2 / 3;
+    overflow: hidden;
+    border: 1px solid transparent;
+    outline: 1px solid rgb(var(--color-foreground-rgb) / 0.12);
+    outline-offset: -1px;
+    transition: border-color 0.2s ease, outline-color 0.2s ease;
+  }
+
+  .neroli-swatches__item:hover {
+    outline-color: rgb(var(--color-foreground-rgb) / 0.45);
+  }
+
+  .neroli-swatches__item.is-current {
+    border-color: var(--color-foreground);
+    outline-color: var(--color-foreground);
+  }
+
+  .neroli-swatches__image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .neroli-swatches__name {
+    position: absolute;
+    inset: auto 0 0;
+    padding: 3px 2px;
+    font-size: 0.6875rem;
+    line-height: 1.2;
+    text-align: center;
+    color: var(--color-foreground);
+    background: rgb(255 255 255 / 0.85);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .neroli-swatches__item.is-current .neroli-swatches__name,
+  .neroli-swatches__item:hover .neroli-swatches__name,
+  .neroli-swatches__item:focus-visible .neroli-swatches__name {
+    opacity: 1;
+  }
+
+  /* Colors are shown as photo swatches, so hide the plain "Color" buttons from the variant picker. */
+  .product-details:has(.neroli-swatches) .variant-option:has(input[data-option-name='Color' i]) {
+    display: none;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Color swatches (Néroli)",
+  "tag": null,
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Shows products whose title starts with the same word (e.g. all \"Luma\" products) as photo swatches. The color name is taken from the part of the title after the dash."
+    },
+    {
+      "type": "text",
+      "id": "label",
+      "label": "Label",
+      "default": "Color:"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Look for colors in",
+      "info": "Leave empty to search all products."
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_when_single",
+      "label": "Hide when the product has only one color",
+      "default": false
+    }
+  ],
+  "presets": [
+    {
+      "name": "Color swatches (Néroli)"
+    }
+  ]
+}
+{% endschema %}

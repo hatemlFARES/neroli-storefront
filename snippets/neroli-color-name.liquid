@@ -1,0 +1,29 @@
+{%- doc -%}
+  Outputs a product's color name: the product's "Color" option if it has one,
+  otherwise the part of the title after the dash ("Luma set - Blush" -> "Blush").
+  Outputs nothing when neither is found.
+
+  @param {product} product - The product
+{%- enddoc -%}
+
+{%- liquid
+  assign color = ''
+  for option in product.options_with_values
+    assign option_name = option.name | downcase
+    if option_name == 'color' or option_name == 'colour'
+      assign color = option.selected_value | default: option.values.first
+    endif
+  endfor
+
+  if color == blank
+    assign normalized = product.title | replace: ' – ', ' - ' | replace: ' — ', ' - '
+    if normalized contains ' - '
+      assign color = normalized | split: ' - ' | last | strip
+      assign first_letter = color | slice: 0 | upcase
+      assign rest = color | slice: 1, 200
+      assign color = first_letter | append: rest
+    endif
+  endif
+
+  echo color | escape
+-%}

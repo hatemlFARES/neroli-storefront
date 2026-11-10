@@ -6,7 +6,8 @@
  * or related systems. Please exercise caution as any changes
  * made to this file may be overwritten.
  * ------------------------------------------------------------
- */{
+ */
+{
   "sections": {
     "hero_jVaWmY": {
       "type": "hero",
@@ -135,47 +136,157 @@
         "tile_1": {
           "type": "tile",
           "settings": {
-            "name": "Auri Set",
-            "image": "shopify://shop_images/WhatsAppImage2026-08-31at17.29.19.jpg",
-            "link": "shopify://products/auri-set-white-pointelle"
+            "product": "luma-set-black",
+            "name": "Luma Black"
           }
         },
-        "tile_2": { "type": "tile", "settings": { "name": "Linen Drift" } },
-        "tile_3": { "type": "tile", "settings": { "name": "Cloud Nine" } },
-        "tile_4": { "type": "tile", "settings": { "name": "Sable Stripe" } },
-        "tile_5": { "type": "tile", "settings": { "name": "Dawn Robe" } },
-        "tile_6": { "type": "tile", "settings": { "name": "Blush Bloom" } },
-        "tile_7": { "type": "tile", "settings": { "name": "Ivory Rest" } }
+        "tile_2": {
+          "type": "tile",
+          "settings": {
+            "product": "auri-set-white-pointelle",
+            "name": "Luma Blush"
+          }
+        },
+        "tile_3": {
+          "type": "tile",
+          "settings": {
+            "product": "zaya-set-blue-white-stripes",
+            "name": "Zaya Stripes"
+          }
+        },
+        "tile_4": {
+          "type": "tile",
+          "settings": {
+            "product": "milu-set-100-organic-bamboo",
+            "name": "Milu Bamboo"
+          }
+        },
+        "tile_5": {
+          "type": "tile",
+          "settings": {
+            "product": "aelia-set-cream-pointelle",
+            "name": "Aelia Cream"
+          }
+        },
+        "tile_6": {
+          "type": "tile",
+          "settings": {
+            "product": "auri-set-white-pointelle-1",
+            "name": "Auri White"
+          }
+        },
+        "tile_7": {
+          "type": "tile",
+          "settings": {
+            "product": "alba-grey-pointelle-t-shirt",
+            "name": "Alba Tee"
+          }
+        },
+        "tile_8": {
+          "type": "tile",
+          "settings": {
+            "product": "nola-set-soft-beige",
+            "name": "Nola Beige"
+          }
+        }
       },
-      "block_order": ["tile_1", "tile_2", "tile_3", "tile_4", "tile_5", "tile_6", "tile_7"],
+      "block_order": [
+        "tile_8",
+        "tile_1",
+        "tile_2",
+        "tile_3",
+        "tile_4",
+        "tile_5",
+        "tile_6",
+        "tile_7"
+      ],
       "name": "Pajama showcase",
       "settings": {
         "heading": "This Season's Favorites",
         "padding_top": 48,
-        "padding_bottom": 64
+        "padding_bottom": 64,
+        "layout": "grid",
+        "tiles_per_view": 4
       }
     },
-    "founder_letter_section": {
-      "type": "founder-letter",
-      "name": "Founder letter",
+    "lookbook_gallery_section": {
+      "type": "lookbook-gallery",
+      "name": "Lookbook gallery",
+      "blocks": {
+        "bed_a": {
+          "type": "photo",
+          "settings": {
+            "image": "shopify://shop_images/neroli-gallery-2.jpg",
+            "new_row": true,
+            "focus_x": 50,
+            "focus_y": 50
+          }
+        },
+        "bed_b": {
+          "type": "photo",
+          "settings": {
+            "image": "shopify://shop_images/neroli-gallery-8.jpg",
+            "new_row": false,
+            "focus_x": 50,
+            "focus_y": 50
+          }
+        },
+        "picnic_a": {
+          "type": "photo",
+          "settings": {
+            "image": "shopify://shop_images/neroli-gallery-7.jpg",
+            "new_row": true,
+            "focus_x": 50,
+            "focus_y": 50
+          }
+        },
+        "picnic_b": {
+          "type": "photo",
+          "settings": {
+            "image": "shopify://shop_images/neroli-gallery-3.jpg",
+            "new_row": false,
+            "focus_x": 50,
+            "focus_y": 50
+          }
+        },
+        "chair": {
+          "type": "photo",
+          "settings": {
+            "image": "shopify://shop_images/neroli-gallery-4.jpg",
+            "new_row": true,
+            "focus_x": 50,
+            "focus_y": 50
+          }
+        },
+        "kitchen": {
+          "type": "photo",
+          "settings": {
+            "image": "shopify://shop_images/neroli-gallery-9.jpg",
+            "new_row": false,
+            "focus_x": 50,
+            "focus_y": 50
+          }
+        }
+      },
+      "block_order": [
+        "bed_a",
+        "bed_b",
+        "picnic_a",
+        "picnic_b",
+        "chair",
+        "kitchen"
+      ],
       "settings": {
-        "image": "shopify://shop_images/neroli-founder-portrait.jpg",
-        "pullquote": "Every stitch we choose is a quiet promise: comfort should never be compromised.",
-        "short_quote": "I didn't set out to build a fashion brand. I set out to build a bedtime ritual worth keeping.",
-        "body_1": "<p>Néroli began with a simple frustration: sleepwear that looked beautiful in photos but felt like a compromise in real life. Scratchy seams, synthetic fabric, fits that never quite matched the body they were meant for.</p>",
-        "body_2": "<p>So we started over — sourcing real, breathable fabric, fitting each piece on real bodies, and refusing to rush a single sample. What you're wearing tonight is the result of that stubbornness, and we hope you can feel it.</p>",
-        "founder_name": "Noa Amrani",
-        "accent_color": "#B98B4E",
-        "background_color": "#FBF7F2",
-        "padding_top": 48,
-        "padding_bottom": 48
+        "heading": "",
+        "padding_top": 0,
+        "padding_bottom": 0
       }
     }
   },
   "order": [
     "hero_jVaWmY",
-    "fabric_story_section",
     "pajama_showcase_section",
-    "founder_letter_section"
+    "fabric_story_section",
+    "lookbook_gallery_section"
   ]
 }

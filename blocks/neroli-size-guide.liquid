@@ -1,0 +1,210 @@
+{%- comment -%}
+  "Find My Size" link that opens a size guide popup.
+  Place it directly above the variant picker: the link lines up on the right of the "Size" label.
+  The popup shows the size chart from the block settings, plus the product's own
+  "Fit reference" / "Sizing advice" lines taken from its description.
+{%- endcomment -%}
+
+{% capture nl %}
+{% endcapture %}
+{%- liquid
+  assign product = closest.product
+  assign fit_html = ''
+  if block.settings.show_product_fit and product != blank
+    assign lines = product.description | split: nl
+    for line in lines
+      assign plain = line | strip_html | downcase
+      if plain contains 'fit reference' or plain contains 'sizing advice'
+        assign fit_html = fit_html | append: line
+      endif
+    endfor
+  endif
+
+  assign dialog_id = 'NeroliSizeGuide-' | append: block.id
+-%}
+
+<div class="neroli-size-guide" {{ block.shopify_attributes }}>
+  <button
+    type="button"
+    class="neroli-size-guide__link button-unstyled"
+    aria-haspopup="dialog"
+    aria-controls="{{ dialog_id }}"
+    onclick="document.getElementById('{{ dialog_id }}').showModal()"
+  >
+    {{ block.settings.link_label }}
+  </button>
+
+  <dialog
+    id="{{ dialog_id }}"
+    class="neroli-size-guide__dialog"
+    aria-labelledby="{{ dialog_id }}-title"
+    onclick="if (event.target === this) this.close()"
+  >
+    <div class="neroli-size-guide__panel">
+      <div class="neroli-size-guide__header">
+        <h2 id="{{ dialog_id }}-title" class="neroli-size-guide__title">{{ block.settings.title }}</h2>
+        <button
+          type="button"
+          class="neroli-size-guide__close button-unstyled"
+          aria-label="{{ 'actions.close' | t }}"
+          onclick="this.closest('dialog').close()"
+        >
+          <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 2l12 12M14 2L2 14" stroke="currentColor" stroke-width="1.2" fill="none"/></svg>
+        </button>
+      </div>
+
+      {%- if block.settings.chart != blank -%}
+        <div class="neroli-size-guide__chart rte">{{ block.settings.chart }}</div>
+      {%- endif -%}
+
+      {%- if fit_html != blank -%}
+        <div class="neroli-size-guide__fit rte">{{ fit_html }}</div>
+      {%- endif -%}
+
+      {%- if block.settings.chart == blank and fit_html == blank -%}
+        <p class="neroli-size-guide__empty">{{ block.settings.empty_text }}</p>
+      {%- endif -%}
+    </div>
+  </dialog>
+</div>
+
+{% stylesheet %}
+  /* Zero-height row: the link floats up onto the "Size" label line of the variant picker below it. */
+  .neroli-size-guide {
+    position: relative;
+    width: 100%;
+    height: 0;
+    z-index: 1;
+  }
+
+  .neroli-size-guide__link {
+    position: absolute;
+    top: var(--neroli-size-guide-offset, 20px);
+    inset-inline-end: 0;
+    font-size: var(--font-size--sm, 0.875rem);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    color: var(--color-foreground);
+    cursor: pointer;
+  }
+
+  .neroli-size-guide__link:hover {
+    text-decoration-thickness: 2px;
+  }
+
+  .neroli-size-guide__dialog {
+    width: min(560px, calc(100vw - 32px));
+    max-height: calc(100dvh - 64px);
+    padding: 0;
+    border: 0;
+    color: var(--color-foreground);
+    background: var(--color-background);
+    box-shadow: 0 20px 60px rgb(0 0 0 / 0.18);
+  }
+
+  .neroli-size-guide__dialog::backdrop {
+    background: rgb(0 0 0 / 0.35);
+  }
+
+  .neroli-size-guide__panel {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 28px 28px 32px;
+  }
+
+  .neroli-size-guide__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .neroli-size-guide__title {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .neroli-size-guide__close {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    cursor: pointer;
+  }
+
+  .neroli-size-guide__chart table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+  }
+
+  .neroli-size-guide__chart :is(th, td) {
+    padding: 8px 6px;
+    text-align: center;
+    border-bottom: 1px solid rgb(var(--color-foreground-rgb) / 0.12);
+  }
+
+  .neroli-size-guide__fit,
+  .neroli-size-guide__empty {
+    margin: 0;
+    font-size: 0.875rem;
+    color: rgb(var(--color-foreground-rgb) / 0.8);
+  }
+
+  .neroli-size-guide__fit p {
+    margin: 0 0 6px;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Size guide (Néroli)",
+  "tag": null,
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Place this block directly above the variant picker so the link sits next to the \"Size\" label."
+    },
+    {
+      "type": "text",
+      "id": "link_label",
+      "label": "Link text",
+      "default": "Find My Size"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Popup title",
+      "default": "Size guide"
+    },
+    {
+      "type": "richtext",
+      "id": "chart",
+      "label": "Size chart",
+      "info": "Your measurements for each size (XS, S, M, L)."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_product_fit",
+      "label": "Show the product's fit reference",
+      "info": "Adds the \"Fit reference\" and \"Sizing advice\" lines from the product description.",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "empty_text",
+      "label": "Text when there is no size info",
+      "default": "Need help choosing a size? Send us a message and we'll help you find your fit."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Size guide (Néroli)"
+    }
+  ]
+}
+{% endschema %}

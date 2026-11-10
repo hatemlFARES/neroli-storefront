@@ -1,0 +1,30 @@
+{%- doc -%}
+  One photo swatch linking to a color sibling product. Used by the "Color swatches (Néroli)" block.
+
+  @param {product} product - The product this swatch links to
+  @param {product} current - The product being viewed
+{%- enddoc -%}
+
+{%- capture label -%}{%- render 'neroli-color-name', product: product -%}{%- endcapture -%}
+{%- assign label = label | strip -%}
+{%- assign is_current = false -%}
+{%- if product.id == current.id -%}{%- assign is_current = true -%}{%- endif -%}
+
+<a
+  href="{{ product.url }}"
+  class="neroli-swatches__item{% if is_current %} is-current{% endif %}"
+  {% if is_current %}aria-current="true"{% endif %}
+  aria-label="{{ label | default: product.title | escape }}"
+  title="{{ label | default: product.title | escape }}"
+>
+  {%- if product.featured_image -%}
+    {{
+      product.featured_image
+      | image_url: width: 240
+      | image_tag: widths: '120, 240', sizes: '68px', class: 'neroli-swatches__image', loading: 'lazy', alt: ''
+    }}
+  {%- endif -%}
+  {%- if label != blank -%}
+    <span class="neroli-swatches__name">{{ label }}</span>
+  {%- endif -%}
+</a>
